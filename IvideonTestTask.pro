@@ -7,10 +7,12 @@ TARGET = cam_server
 
 SOURCES += main.cpp \
     led.cpp \
-    camera.cpp
+    camera.cpp \
+    pipeline.cpp
 
 HEADERS += \
     param.h \
     param_impl.h \
     led.h \
-    camera.h
+    camera.h \
+    pipeline.h
