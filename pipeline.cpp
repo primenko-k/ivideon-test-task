@@ -56,6 +56,9 @@ bool Pipeline::exist()
 
 bool Pipeline::open()
 {
+    if (!exist())
+        return false;
+
     stream.open(path.c_str(), mode);
     if (stream.is_open())
         return true;
