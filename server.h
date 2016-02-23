@@ -36,6 +36,9 @@ private:
     void cmdSplit(std::string &cmd, std::string &cmd_name, std::string &cmd_arg) const;
     const std::string & getCommandsInfo() const { return cmdsInfo; }
 
+//  internal command functions
+    std::string help_cmd(std::string &arg) const;
+
 private:
     Camera *cam;
     Pipeline listeningPipe;
@@ -43,6 +46,9 @@ private:
 
     std::string cmdsInfo;
     boost::property_tree::basic_ptree<std::string, cmd_func_type> cmds;
+
+    typedef std::string (Server::*cmd_internal_func_type)(std::string &arg) const;
+    boost::property_tree::basic_ptree<std::string, cmd_internal_func_type> cmds_internal;
 };
 
 #endif // SERVER_H

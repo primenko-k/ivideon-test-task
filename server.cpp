@@ -22,6 +22,7 @@ void Server::cmdsInit()
 {
     cmds.clear();
     cmdsInfo.clear();
+    cmds_internal.clear();
 
     for (int i = 0; i < supported_cmds_num; i++)
     {
@@ -30,6 +31,8 @@ void Server::cmdsInit()
         cmds.put(c->cmd_name, c->cmd_func);
         cmdsInfo.append(c->cmd_name + '\t' + c->cmd_arg + '\t' + c->cmd_result + '\t' + c->cmd_desc + '\n');
     }
+
+    cmds_internal.put("help", &Server::help_cmd);
 }
 
 bool Server::run()
@@ -111,6 +114,10 @@ std::string Server::execCommand(std::string &cmd) const
 
     cmdSplit(cmd, cmd_name, cmd_arg);
 
+    cmd_internal_func_type cmd_int_func = cmds_internal.get<cmd_internal_func_type>(cmd_name, NULL);
+    if (cmd_int_func)
+        return (this->*cmd_int_func)(cmd_arg);
+
     cmd_func_type cmd_func = cmds.get<cmd_func_type>(cmd_name, NULL);
 
     if (cmd_func)
@@ -125,4 +132,9 @@ void Server::cmdSplit(std::string &cmd, std::string &cmd_name, std::string &cmd_
 
     ss >> cmd_name;
     ss >> cmd_arg;
+}
+
+std::string Server::help_cmd(std::string &) const
+{
+    return getCommandsInfo();
 }
