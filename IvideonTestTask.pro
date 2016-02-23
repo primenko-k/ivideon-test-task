@@ -8,3 +8,5 @@ TARGET = cam_server
 SOURCES += main.cpp \
 
 HEADERS += \
+    param.h \
+    param_impl.h
