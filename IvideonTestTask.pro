@@ -12,7 +12,8 @@ SOURCES += main.cpp \
     camera.cpp \
     pipeline.cpp \
     client.cpp \
-    server.cpp
+    server.cpp \
+    commands.cpp
 
 HEADERS += \
     param.h \
@@ -21,4 +22,5 @@ HEADERS += \
     camera.h \
     pipeline.h \
     client.h \
-    server.h
+    server.h \
+    commands.h
