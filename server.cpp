@@ -32,6 +32,12 @@ bool Server::run()
             boost::thread *serviceThread = new boost::thread(&Server::serveClient, this, new_client);
             serveThreads.add_thread(serviceThread);
         }
+
+        /*
+         * Give to a client time to close pipe.
+         * So we prevent secondary trigger waitingClient() by the same client.
+         */
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(40));
     }
 
     return true;
