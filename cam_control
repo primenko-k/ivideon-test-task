@@ -2,6 +2,7 @@
 
 server_pipe='/tmp/cam_server'
 server_process_name='cam_server'
+lock_file='/var/lock/cam.lock'
 
 case "$1" in
   '--help'|'-h')
@@ -29,10 +30,13 @@ pipe_in=""
 pipe_out=""
 # There is possibility that another client is trying
 # to connect simultaneously with us. In this case
-# read from pipe can return empty string.
-while [ -z "$pipe_in" ] ; do
+# read from pipe can return incomplete string.
+# So we lock read to avoid this situation.
+exec 9>$lock_file
+flock -x 9
 read pipe_in pipe_out < $server_pipe
-done
+flock -u 9
+
 if [ ! -p $pipe_in -o ! -p $pipe_out ]; then
     errcho "Server unknown error"
     exit 1
