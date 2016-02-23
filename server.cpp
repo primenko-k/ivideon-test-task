@@ -18,10 +18,26 @@ void Server::stop()
     serveThreads.interrupt_all();
 }
 
+void Server::cmdsInit()
+{
+    cmds.clear();
+    cmdsInfo.clear();
+
+    for (int i = 0; i < supported_cmds_num; i++)
+    {
+        const Cmd *c = supported_cmds+i;
+
+        cmds.put(c->cmd_name, c->cmd_func);
+        cmdsInfo.append(c->cmd_name + '\t' + c->cmd_arg + '\t' + c->cmd_result + '\t' + c->cmd_desc + '\n');
+    }
+}
+
 bool Server::run()
 {
     if (!cameraAvailable() || !startServer())
         return false;
+
+    cmdsInit();
 
     while (1)
     {
@@ -70,5 +86,43 @@ Client_Smart_Ptr Server::waitingClient()
 
 void Server::serveClient(Client_Smart_Ptr client)  // executes in separate thread
 {
+    if (!client->connect()) // blocked until client connected
+    {
+        std::cerr << "Client @" << client << "isnt connected" << std::endl;
+        return;
+    }
 
+    std::string cmd;
+
+    cmd = client->getCommand();
+    while (!cmd.empty())
+    {
+        client->sendCommandResult(execCommand(cmd));
+        cmd = client->getCommand();
+    }
+
+    client->disconnect();
+}
+
+std::string Server::execCommand(std::string &cmd) const
+{
+    std::string cmd_name;
+    std::string cmd_arg;
+
+    cmdSplit(cmd, cmd_name, cmd_arg);
+
+    cmd_func_type cmd_func = cmds.get<cmd_func_type>(cmd_name, NULL);
+
+    if (cmd_func)
+        return cmd_func(cmd_arg, cam);
+    else
+        return cmd_inval_func(cmd_arg, cam);
+}
+
+void Server::cmdSplit(std::string &cmd, std::string &cmd_name, std::string &cmd_arg) const
+{
+    std::stringstream ss(cmd);
+
+    ss >> cmd_name;
+    ss >> cmd_arg;
 }

@@ -5,6 +5,7 @@
 #include "pipeline.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp> // needs to add -lboost_thread and -lboost_system to compiler options
+#include <boost/property_tree/ptree.hpp>
 
 #define SERVER_LISTENING_PIPE_PATH  "/tmp/cam_server"
 
@@ -29,11 +30,19 @@ private:
     bool startServer();
     Client_Smart_Ptr waitingClient();
     void serveClient(Client_Smart_Ptr client);
+    std::string execCommand(std::string &cmd) const;
+
+    void cmdsInit();
+    void cmdSplit(std::string &cmd, std::string &cmd_name, std::string &cmd_arg) const;
+    const std::string & getCommandsInfo() const { return cmdsInfo; }
 
 private:
     Camera *cam;
     Pipeline listeningPipe;
     boost::thread_group serveThreads;
+
+    std::string cmdsInfo;
+    boost::property_tree::basic_ptree<std::string, cmd_func_type> cmds;
 };
 
 #endif // SERVER_H
