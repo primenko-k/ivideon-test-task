@@ -6,9 +6,11 @@ CONFIG -= qt
 TARGET = cam_server
 
 SOURCES += main.cpp \
-    led.cpp
+    led.cpp \
+    camera.cpp
 
 HEADERS += \
     param.h \
     param_impl.h \
-    led.h
+    led.h \
+    camera.h
