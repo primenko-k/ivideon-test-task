@@ -73,7 +73,8 @@ bool Server::startServer()
 Client_Smart_Ptr Server::waitingClient()
 {
 
-    listeningPipe.open();    // blocked until client connected
+    if (!listeningPipe.open())    // blocked until client connected
+        return Client_Smart_Ptr();
 
     Client_Smart_Ptr client(new Client);
     if (client)

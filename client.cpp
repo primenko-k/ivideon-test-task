@@ -18,8 +18,8 @@ Client::~Client()
 
 bool Client::connect()
 {
-    pipeIn.open();
-    pipeOut.open();
+    if (pipeIn.open())
+        pipeOut.open();
 
     if (!pipeIn.opened() || !pipeOut.opened())
         return false;
