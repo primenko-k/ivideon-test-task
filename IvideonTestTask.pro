@@ -24,3 +24,6 @@ HEADERS += \
     client.h \
     server.h \
     commands.h
+
+OTHER_FILES += \
+    cam_control

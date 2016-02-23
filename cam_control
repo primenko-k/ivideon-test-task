@@ -1,0 +1,55 @@
+#!/bin/sh
+
+server_pipe='/tmp/cam_server'
+server_process_name='cam_server'
+
+case "$1" in
+  '--help'|'-h')
+     echo "Usage: $0 [--help|-h]"
+     echo ""
+     echo "Perform control of camera parameters by typing commands in format:"
+     echo "COMMAND [ARGUMENT]"
+     echo ""
+     echo "To view all available camera control commands and its arguments"
+     echo "type the command 'help'."
+     echo "To exit type the command 'exit'."
+     exit 0
+     ;;
+esac
+
+alias errcho='>&2 echo'
+
+server_process_pid=$(pgrep $server_process_name)
+if [ -z "$server_process_pid" -o ! -p $server_pipe ]; then
+    errcho "Server is not started"
+    exit 1
+fi
+
+pipe_in=""
+pipe_out=""
+# There is possibility that another client is trying
+# to connect simultaneously with us. In this case
+# read from pipe can return empty string.
+while [ -z "$pipe_in" ] ; do
+read pipe_in pipe_out < $server_pipe
+done
+if [ -z $pipe_out ]; then
+    errcho "Server is broken"
+    exit 1
+fi
+
+cat < "$pipe_in" &
+exec 5>"$pipe_out" # keep pipe_out opened
+
+echo "Type 'help' to view command list. Type 'exit' to quit"
+
+while true; do
+    if read line; then
+        if [ "$line" = 'exit' ]; then
+            break
+        fi
+        [ -z "$line" ] || echo $line > "$pipe_out"
+    fi
+done
+
+exec 5>&- # close pipe_out
