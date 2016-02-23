@@ -2,7 +2,7 @@
 #include "camera.h"
 #include "client.h"
 
-Server::Server(Camera *camera) : listeningPipe(SERVER_LISTENING_PIPE_PATH, true), serveThreads()
+Server::Server(Camera *camera) : listeningPipe(SERVER_LISTENING_PIPE_PATH, true)
 {
     setCamera(camera);
 }
@@ -15,7 +15,11 @@ Server::~Server()
 void Server::stop()
 {
     listeningPipe.remove();
-    serveThreads.interrupt_all();
+    while ( !clients.empty())
+    {
+        (clients.front())->disconnect();
+        clients.pop_front();
+    }
 }
 
 void Server::cmdsInit()
@@ -48,9 +52,11 @@ bool Server::run()
 
         if (new_client != NULL)
         {
-            boost::thread *serviceThread = new boost::thread(&Server::serveClient, this, new_client);
-            serveThreads.add_thread(serviceThread);
+            clients.push_back(new_client);
+            boost::thread serviceThread(&Server::serveClient, this, new_client);
         }
+        else
+            break;
 
         /*
          * Give to a client time to close pipe.
@@ -58,6 +64,8 @@ bool Server::run()
          */
         boost::this_thread::sleep_for(boost::chrono::milliseconds(40));
     }
+
+    stop();
 
     return true;
 }
@@ -92,7 +100,6 @@ void Server::serveClient(Client_Smart_Ptr client)  // executes in separate threa
 {
     if (!client->connect()) // blocked until client connected
     {
-        std::cerr << "Client @" << client << "isnt connected" << std::endl;
         return;
     }
 
@@ -106,6 +113,7 @@ void Server::serveClient(Client_Smart_Ptr client)  // executes in separate threa
     }
 
     client->disconnect();
+    clients.remove(client);
 }
 
 std::string Server::execCommand(std::string &cmd) const

@@ -42,7 +42,7 @@ private:
 private:
     Camera *cam;
     Pipeline listeningPipe;
-    boost::thread_group serveThreads;
+    std::list<Client_Smart_Ptr> clients;
 
     std::string cmdsInfo;
     boost::property_tree::basic_ptree<std::string, cmd_func_type> cmds;
