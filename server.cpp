@@ -120,6 +120,7 @@ std::string Server::execCommand(std::string &cmd) const
 
     cmd_func_type cmd_func = cmds.get<cmd_func_type>(cmd_name, NULL);
 
+    boost::lock_guard<boost::mutex> guard(cam->cam_mutex);
     if (cmd_func)
         return cmd_func(cmd_arg, cam);
     else
