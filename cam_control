@@ -33,9 +33,13 @@ pipe_out=""
 while [ -z "$pipe_in" ] ; do
 read pipe_in pipe_out < $server_pipe
 done
-if [ -z $pipe_out ]; then
-    errcho "Server is broken"
+if [ ! -p $pipe_in -o ! -p $pipe_out ]; then
+    errcho "Server unknown error"
     exit 1
+fi
+if [ ! -r $pipe_in -o ! -w $pipe_out ]; then
+    errcho "Permission denied"
+    exit 2
 fi
 
 cat < "$pipe_in" &
