@@ -21,6 +21,11 @@ project is from Qt Creator. But you can build project manually with
 Installation ("make install") is not needed.
 If you want to build debug version add to qmake argument 'CONFIG+=debug'.
 
+The program has been tested on the following Linux distributions:
+
+* Ubuntu 14.04.3 LTS (x86_64)
+* openSUSE 42.1 (x86_64)
+
 ## Usage
 
 After the build process is completed there will be two executable files in
