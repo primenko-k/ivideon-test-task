@@ -2,7 +2,7 @@
 
 server_pipe='/tmp/cam_server'
 server_process_name='cam_server'
-lock_file='/var/lock/cam.lock'
+lock_file='/tmp/cam.lock'
 
 case "$1" in
   '--help'|'-h')
