@@ -2,7 +2,7 @@
 #include "camera.h"
 #include "client.h"
 
-Server::Server(Camera *camera) : listeningPipe(SERVER_LISTENING_PIPE_PATH, true)
+Server::Server(Camera *camera) : listeningPipe(SERVER_LISTENING_PIPE_PATH, false)
 {
     setCamera(camera);
 }
@@ -57,12 +57,6 @@ bool Server::run()
         }
         else
             break;
-
-        /*
-         * Give to a client time to close pipe.
-         * So we prevent secondary trigger waitingClient() by the same client.
-         */
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(40));
     }
 
     stop();
@@ -84,12 +78,10 @@ Client_Smart_Ptr Server::waitingClient()
     if (!listeningPipe.open())    // blocked until client connected
         return Client_Smart_Ptr();
 
-    Client_Smart_Ptr client(new Client);
-    if (client)
-    {
-        std::string clientPrivatePipes = (client->pipeInPath() + " " + client->pipeOutPath());
-        listeningPipe.writeLine(clientPrivatePipes);
-    }
+    std::string clientPrivatePipesDir;
+    listeningPipe.readLineTo(clientPrivatePipesDir);
+
+    Client_Smart_Ptr client(new Client(clientPrivatePipesDir));
 
     listeningPipe.close();
 
@@ -105,11 +97,11 @@ void Server::serveClient(Client_Smart_Ptr client)  // executes in separate threa
 
     std::string cmd;
 
-    cmd = client->getCommand();
+    client->getCommand(cmd);
     while (!cmd.empty())
     {
         client->sendCommandResult(execCommand(cmd));
-        cmd = client->getCommand();
+        client->getCommand(cmd);
     }
 
     client->disconnect();
@@ -146,7 +138,7 @@ void Server::cmdSplit(std::string &cmd, std::string &cmd_name, std::string &cmd_
     ss >> cmd_arg;
 }
 
-std::string Server::help_cmd(std::string &) const
+const std::string &Server::help_cmd(std::string &) const
 {
     return getCommandsInfo();
 }

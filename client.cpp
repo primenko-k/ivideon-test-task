@@ -1,12 +1,8 @@
 #include "client.h"
-#include <cstdlib>
 #include <boost/filesystem.hpp> // needs to add -lboost_filesystem and -lboost_system to compiler options
 
-Client::Client() : pipeIn(false), pipeOut(true)
+Client::Client(std::string &pipeDirName) : pipeDirName(pipeDirName), pipeIn(false), pipeOut(true)
 {
-    char tmp[] = CLIENT_PIPE_DIR_PATTERN;
-    pipeDirName = mkdtemp(tmp);
-
     pipeIn.make(pipeInPathInner());
     pipeOut.make(pipeOutPathInner());
 }
@@ -18,8 +14,8 @@ Client::~Client()
 
 bool Client::connect()
 {
-    if (pipeIn.open())
-        pipeOut.open();
+    if (pipeOut.open())
+        pipeIn.open();
 
     if (!pipeIn.opened() || !pipeOut.opened())
         return false;
@@ -35,9 +31,9 @@ void Client::disconnect()
         boost::filesystem::remove_all(pipeDirName);
 }
 
-std::string Client::getCommand()
+std::string & Client::getCommand(std::string &buf)
 {
-    return pipeIn.readLine();
+    return pipeIn.readLineTo(buf);
 }
 
 void Client::sendCommandResult(const std::string &cmd_result)

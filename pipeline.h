@@ -16,9 +16,9 @@ public:
     bool exist();
     bool open();
     bool opened();
-    std::string readLine();
-    void write(std::string buf);
-    void writeLine(std::string buf);
+    std::string &readLineTo(std::string &buf);
+    void write(const std::string &buf);
+    void writeLine(const std::string &buf);
     void close();
     void remove();
 

@@ -1,7 +1,6 @@
 #!/bin/bash
 # executes simultaneously 20 clients at a specified interval
-
-interval=${1:-1}
+# or by pressing <Enter>
 
 if [ ! -x ./cam_control ]; then
 echo "'cam_control' must be located in the current directory" >&2
@@ -19,6 +18,10 @@ echo exit | tee >(./cam_control>/dev/null) >(./cam_control>/dev/null) \
 >(./cam_control>/dev/null) >(./cam_control>/dev/null) \
 >(./cam_control>/dev/null) >(./cam_control>/dev/null) \
 >(./cam_control>/dev/null) >(./cam_control>/dev/null)
-sleep $interval
+if [ -n "$1" ]; then
+sleep $1
+else
+read line
+fi
 done
 

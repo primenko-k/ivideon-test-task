@@ -3,6 +3,7 @@
 server_pipe='/tmp/cam_server'
 server_process_name='cam_server'
 lock_file='/tmp/cam.lock'
+priv_pipes_dir_pattern='/tmp/cam-XXXXXX'
 
 case "$1" in
   '--help'|'-h')
@@ -26,25 +27,25 @@ if [ -z "$server_process_pid" -o ! -p $server_pipe ]; then
     exit 1
 fi
 
-pipe_in=""
-pipe_out=""
-# There is possibility that another client is trying
-# to connect simultaneously with us. In this case
-# read from pipe can return incomplete string.
-# So we lock read to avoid this situation.
-exec 9>$lock_file
-flock -x 9
-read pipe_in pipe_out < $server_pipe
-flock -u 9
+priv_pipes_dir=$(mktemp -d "$priv_pipes_dir_pattern")
+pipe_in="$priv_pipes_dir/in.pipe"
+pipe_out="$priv_pipes_dir/out.pipe"
+
+mkfifo $pipe_in $pipe_out
 
 if [ ! -p $pipe_in -o ! -p $pipe_out ]; then
-    errcho "Server unknown error"
+    errcho "System error"
     exit 1
 fi
-if [ ! -r $pipe_in -o ! -w $pipe_out ]; then
-    errcho "Permission denied"
-    exit 2
-fi
+
+# There is possibility that another client is trying
+# to connect simultaneously with us. In this case
+# write to pipe can cause termination by SIGPIPE.
+# So we lock write to avoid this situation.
+exec 9>$lock_file
+flock -x 9
+echo $priv_pipes_dir > $server_pipe
+flock -u 9
 
 cat < "$pipe_in" &
 exec 5>"$pipe_out" # keep pipe_out opened

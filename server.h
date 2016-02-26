@@ -38,7 +38,7 @@ private:
     const std::string & getCommandsInfo() const { return cmdsInfo; }
 
 //  internal command functions
-    std::string help_cmd(std::string &arg) const;
+    const std::string &help_cmd(std::string &arg) const;
 
 private:
     Camera *cam;
@@ -49,7 +49,7 @@ private:
     std::string cmdsInfo;
     boost::property_tree::basic_ptree<std::string, cmd_func_type> cmds;
 
-    typedef std::string (Server::*cmd_internal_func_type)(std::string &arg) const;
+    typedef const std::string &(Server::*cmd_internal_func_type)(std::string &arg) const;
     boost::property_tree::basic_ptree<std::string, cmd_internal_func_type> cmds_internal;
 };
 

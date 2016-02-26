@@ -4,14 +4,13 @@
 #include <string>
 #include "pipeline.h"
 
-#define CLIENT_PIPE_DIR_PATTERN "/tmp/cam-XXXXXX"
 #define CLIENT_PIPE_IN_NAME "out.pipe" // <inner IN > <=> <outter OUT>
 #define CLIENT_PIPE_OUT_NAME "in.pipe" // <inner OUT> <=> <outter IN >
 
 class Client
 {
 public:
-    Client();
+    Client(std::string &pipeDirName);
     ~Client();
 
     std::string pipeInPath() { return pipeOutPathInner(); }
@@ -19,7 +18,7 @@ public:
 
     bool connect(); // may block
     void disconnect();
-    std::string getCommand();
+    std::string &getCommand(std::string &buf);
     void sendCommandResult(const std::string &cmd_result);
 
 private:

@@ -38,6 +38,9 @@ bool Pipeline::make(std::string path)
 
 bool Pipeline::make()
 {
+    if (exist())
+        return true;
+
     if (mkfifo(path.c_str(), S_IRWXU|S_IRWXG|S_IRWXO) == 0)
         return true;
     else
@@ -71,19 +74,18 @@ bool Pipeline::opened()
     return (stream.is_open());
 }
 
-std::string Pipeline::readLine()
+std::string &Pipeline::readLineTo(std::string &buf)
 {
-    std::string tmp;
-    std::getline(stream, tmp);
-    return tmp;
+    std::getline(stream, buf);
+    return buf;
 }
 
-void Pipeline::write(std::string buf)
+void Pipeline::write(const std::string &buf)
 {
     stream.write(buf.c_str(), buf.size());
 }
 
-void Pipeline::writeLine(std::string buf)
+void Pipeline::writeLine(const std::string &buf)
 {
     stream.write(buf.c_str(), buf.size()) << std::endl;
 }
