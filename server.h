@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp> // needs to add -lboost_thread and -lboost_system to compiler options
 #include <boost/property_tree/ptree.hpp>
+#include <boost/smart_ptr/detail/spinlock.hpp>
 
 #define SERVER_LISTENING_PIPE_PATH  "/tmp/cam_server"
 
@@ -43,6 +44,7 @@ private:
     Camera *cam;
     Pipeline listeningPipe;
     std::list<Client_Smart_Ptr> clients;
+    boost::detail::spinlock clients_lock;
 
     std::string cmdsInfo;
     boost::property_tree::basic_ptree<std::string, cmd_func_type> cmds;

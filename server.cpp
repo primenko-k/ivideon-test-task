@@ -113,7 +113,9 @@ void Server::serveClient(Client_Smart_Ptr client)  // executes in separate threa
     }
 
     client->disconnect();
+    clients_lock.lock();
     clients.remove(client);
+    clients_lock.unlock();
 }
 
 std::string Server::execCommand(std::string &cmd) const
