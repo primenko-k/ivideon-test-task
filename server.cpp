@@ -15,11 +15,13 @@ Server::~Server()
 void Server::stop()
 {
     listeningPipe.remove();
+    clients_lock.lock();
     while ( !clients.empty())
     {
         (clients.front())->disconnect();
         clients.pop_front();
     }
+    clients_lock.unlock();
 }
 
 void Server::cmdsInit()
@@ -52,7 +54,9 @@ bool Server::run()
 
         if (new_client != NULL)
         {
+            clients_lock.lock();
             clients.push_back(new_client);
+            clients_lock.unlock();
             boost::thread serviceThread(&Server::serveClient, this, new_client);
         }
         else
